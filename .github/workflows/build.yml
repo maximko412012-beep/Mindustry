@@ -18,16 +18,14 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
       - name: Build Android APK
-        env:
-          ANDROID_HOME: ${{ github.workspace }}/android-sdk # Указываем корректный путь для окружения
-        run: |
-          # Экспорт стандартного пути Android SDK на ubuntu-latest
-          export ANDROID_HOME=$ANDROID_HOME
-          ./gradlew android:assembleDebug --stacktrace --no-daemon
+        run: ./gradlew android:assembleDebug --stacktrace --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
