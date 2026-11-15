@@ -6,6 +6,9 @@ on:
       - '*'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -20,7 +23,14 @@ jobs:
         java-version: 25
 
     - name: Set env
-      run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+      run: |
+        if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+          TAG_NAME="${GITHUB_REF#refs/tags/}"
+        else
+          TAG_NAME="build-$(date +'%Y.%m.%d-%H%M')"
+        fi
+        echo "RELEASE_VERSION=${TAG_NAME}" >> $GITHUB_ENV
+        echo "RELEASE_TAG=${TAG_NAME}" >> $GITHUB_ENV
 
     - name: Generate keystore automatically
       run: |
@@ -54,8 +64,8 @@ jobs:
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: Mindustry/android/build/outputs/apk/release/Mindustry-BE-Android-${{ env.RELEASE_VERSION }}.apk
-        tag: ${{ github.ref }}
+        file: Mindustry/android/build/outputs/apk/release/Mindustry-BE-Android-${{ env.RELEASE_TAG }}.apk
+        tag: ${{ env.RELEASE_TAG }}
         release_name: "Build ${{ env.RELEASE_VERSION }}"
         body: ${{ env.BODY }}
         
