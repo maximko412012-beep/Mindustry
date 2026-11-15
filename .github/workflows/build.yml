@@ -12,10 +12,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
       - name: Build Android APK
+        env:
+          ANDROID_HOME: ${{ github.workspace }}/android-sdk # Указываем корректный путь для окружения
         run: |
-          chmod +x ./gradlew
-          ./gradlew android:assembleDebug
+          # Экспорт стандартного пути Android SDK на ubuntu-latest
+          export ANDROID_HOME=$ANDROID_HOME
+          ./gradlew android:assembleDebug --stacktrace --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
